@@ -154,10 +154,10 @@ install_php ()
         cd /usr/src
         if [ "$DIST" = "DEBIAN" ]; then
                 apt -y install lsb-release apt-transport-https ca-certificates 
-                wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
-                echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
+                #wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+                #echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php7.3.list
                 apt-get update
-                apt install -y php7.3 php7.3-fpm php7.3-mysql php7.3-cli php7.3-json php7.3-readline php7.3-xml php7.3-curl php7.3-gd php7.3-json php7.3-mbstring php7.3-mysql php7.3-opcache php7.3-imap
+                apt install -y php7.0 php7.0-fpm php7.0-mysql php7.0-cli php7.0-json php7.0-readline php7.0-xml php7.0-curl php7.0-gd php7.0-json php7.0-mbstring php7.0-mysql php7.0-opcache php7.0-imap
                 systemctl stop apache2
                 systemctl disable apache2
         else if [ "$DIST" = "CENTOS" ]; then
@@ -280,24 +280,27 @@ normalize_astpp ()
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
         if [ ${DIST} = "DEBIAN" ]; then
                 cp -rf ${ASTPP_SOURCE_DIR}/web_interface/nginx/deb_astpp.conf /etc/nginx/conf.d/astpp.conf
+				sed -i "s#fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;#fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;#g" /etc/nginx/conf.d/astpp.conf
+				sed -i "s#fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;#fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;#g" /etc/nginx/conf.d/fs.conf
                 systemctl start nginx
                 systemctl enable nginx
-                systemctl start php7.3-fpm
-                systemctl enable php7.3-fpm
+                systemctl start php7.0-fpm
+                systemctl enable php7.0-fpm
                 chown -Rf root.root ${ASTPPDIR}
                 chown -Rf www-data.www-data ${ASTPPLOGDIR}
                 chown -Rf root.root ${ASTPPEXECDIR}
                 chown -Rf www-data.www-data ${WWWDIR}/astpp
                 chown -Rf www-data.www-data ${ASTPP_SOURCE_DIR}/web_interface/astpp
                 chmod -Rf 755 ${WWWDIR}/astpp     
-                sed -i "s/;request_terminate_timeout = 0/request_terminate_timeout = 300/" /etc/php/7.3/fpm/pool.d/www.conf
-                sed -i "s#short_open_tag = Off#short_open_tag = On#g" /etc/php/7.3/fpm/php.ini
-                sed -i "s#;cgi.fix_pathinfo=1#cgi.fix_pathinfo=1#g" /etc/php/7.3/fpm/php.ini
-                sed -i "s/max_execution_time = 30/max_execution_time = 3000/" /etc/php/7.3/fpm/php.ini
-                sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/" /etc/php/7.3/fpm/php.ini
-                sed -i "s/post_max_size = 8M/post_max_size = 20M/" /etc/php/7.3/fpm/php.ini
-                sed -i "s/memory_limit = 128M/memory_limit = 512M/" /etc/php/7.3/fpm/php.ini
-                systemctl restart php7.3-fpm
+				sed -i "s/;request_terminate_timeout = 0/request_terminate_timeout = 300/" /etc/php/7.0/fpm/pool.d/www.conf
+				sed -i "s#short_open_tag = Off#short_open_tag = On#g" /etc/php/7.0/fpm/php.ini
+				sed -i "s#;cgi.fix_pathinfo=1#cgi.fix_pathinfo=1#g" /etc/php/7.0/fpm/php.ini
+				sed -i "s/max_execution_time = 30/max_execution_time = 3000/" /etc/php/7.0/fpm/php.ini
+				sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 20M/" /etc/php/7.0/fpm/php.ini
+				sed -i "s/post_max_size = 8M/post_max_size = 20M/" /etc/php/7.0/fpm/php.ini
+				sed -i "s/memory_limit = 128M/memory_limit = 512M/" /etc/php/7.0/fpm/php.ini
+                systemctl restart php7.0-fpm
+				systemctl restart nginx
                 CRONPATH='/var/spool/cron/crontabs/astpp'
         elif  [ ${DIST} = "CENTOS" ]; then
                 cp ${ASTPP_SOURCE_DIR}/web_interface/nginx/cent_astpp.conf /etc/nginx/conf.d/astpp.conf
@@ -539,9 +542,9 @@ check process nginx with pidfile /var/run/nginx.pid
     stop program  = "/bin/systemctl stop nginx"
 
 #-------php-fpm----------------------
-check process php7.3-fpm with pidfile /var/run/php/php7.3-fpm.pid
-    start program = "/bin/systemctl start php7.3-fpm" with timeout 30 seconds
-    stop program  = "/bin/systemctl stop php7.3-fpm"
+check process php7.0-fpm with pidfile /var/run/php/php7.0-fpm.pid
+    start program = "/bin/systemctl start php7.0-fpm" with timeout 30 seconds
+    stop program  = "/bin/systemctl stop php7.0-fpm"
 
 #--------system
 check system localhost
