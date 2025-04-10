@@ -10,7 +10,7 @@ switch_source=true                          # true (source compile) or false (bi
 switch_package=false                        # true (binary package) or false (source compile)
 switch_version=1.10.8                       # which source code to download, only for source
 switch_tls=true                             # true or false
-switch_token=pat_4Ti3VGhgVq2CpeRBQXuKpQ5    # Get the auth token from https://signalwire.com
+switch_token=pat_tT8QMViuBGLg2HXsfhNKbfaw    # Code from octacore signalwire account
                                             # Signup or Login -> Profile -> Personal Auth Token
 # Sofia-Sip Settings
 sofia_version=1.13.8                        # release-version for sofia-sip to use
